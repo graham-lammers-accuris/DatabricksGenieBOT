@@ -36,8 +36,10 @@ load_dotenv()
 DATABRICKS_SPACE_ID = os.getenv("DATABRICKS_SPACE_ID")
 DATABRICKS_HOST = os.getenv("DATABRICKS_HOST")
 DATABRICKS_TOKEN = os.getenv("DATABRICKS_TOKEN")
-APP_ID = os.getenv("MicrosoftAppId", "")
-APP_PASSWORD = os.getenv("MicrosoftAppPassword", "")
+APP_ID = os.getenv("MicrosoftAppId")
+APP_TYPE = os.getenv("MicrosoftAppType")
+TENANT_ID = os.getenv("MicrosoftAppTenantId")  # Optional
+APP_PASSWORD = None # os.getenv("MicrosoftAppPassword", "")
 
 workspace_client = WorkspaceClient(
     host=DATABRICKS_HOST,
@@ -259,8 +261,10 @@ def process_query_results(answer_json: Dict) -> str:
     
     return response
 
-SETTINGS = BotFrameworkAdapterSettings(APP_ID, APP_PASSWORD
-                                       )
+SETTINGS = BotFrameworkAdapterSettings(APP_ID, APP_PASSWORD)
+SETTINGS.microsoft_app_type = APP_TYPE
+SETTINGS.microsoft_app_tenant_id = TENANT_ID
+
 ADAPTER = BotFrameworkAdapter(SETTINGS)
 
 class MyBot(ActivityHandler):
