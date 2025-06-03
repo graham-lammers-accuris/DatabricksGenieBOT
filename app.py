@@ -12,7 +12,6 @@ Note: This is experimental code and is not intended for production use.
 
 Update on May 02 to reflect Databricks API Changes https://www.databricks.com/blog/genie-conversation-apis-public-preview
 """
-
 import os
 import json
 import logging
@@ -39,7 +38,7 @@ DATABRICKS_TOKEN = os.getenv("DATABRICKS_TOKEN")
 APP_ID = os.getenv("MicrosoftAppId")
 APP_TYPE = os.getenv("MicrosoftAppType")
 TENANT_ID = os.getenv("MicrosoftAppTenantId")  # Optional
-APP_PASSWORD = None # os.getenv("MicrosoftAppPassword", "")
+APP_PASSWORD = os.getenv("MicrosoftAppPassword", "")
 
 workspace_client = WorkspaceClient(
     host=DATABRICKS_HOST,
@@ -299,7 +298,7 @@ class MyBot(ActivityHandler):
 BOT = MyBot()
 
 async def messages(req: web.Request) -> web.Response:
-    if "application/json" in req.headers["Content-Type"]:
+    if "application/json" in req.headers.get("Content-Type", ""):
         body = await req.json()
     else:
         return web.Response(status=415)
