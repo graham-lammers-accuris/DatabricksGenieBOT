@@ -298,6 +298,9 @@ class MyBot(ActivityHandler):
 BOT = MyBot()
 
 async def messages(req: web.Request) -> web.Response:
+
+    logger.info(f"Received request: {req.method} {req.path}")
+    
     if "application/json" in req.headers.get("Content-Type", ""):
         body = await req.json()
     else:
