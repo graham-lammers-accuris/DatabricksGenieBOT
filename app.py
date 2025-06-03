@@ -46,6 +46,7 @@ workspace_client = WorkspaceClient(
     token=DATABRICKS_TOKEN
 )
 
+
 genie_api = GenieAPI(workspace_client.api_client)
 
 def get_attachment_query_result(space_id, conversation_id, message_id, attachment_id):
