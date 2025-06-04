@@ -320,7 +320,7 @@ async def messages(req: web.Request) -> web.Response:
             return web.json_response(data=response.body, status=response.status)
         return web.Response(status=201)
     except Exception as e:
-        logger.error(f"Error processing request: {str(e)}")
+        logger.error(f"Error processing the request: {str(e)}")
         return web.Response(status=500)
 
 app = web.Application()
