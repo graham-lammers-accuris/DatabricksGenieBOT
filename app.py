@@ -25,6 +25,7 @@ from databricks.sdk.service.dashboards import GenieAPI
 import asyncio
 import requests
 
+
 # Log
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
