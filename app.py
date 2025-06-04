@@ -40,7 +40,6 @@ APP_ID = os.getenv("MicrosoftAppId")
 APP_TYPE = os.getenv("MicrosoftAppType")
 TENANT_ID = os.getenv("MicrosoftAppTenantId")  # Optional
 APP_PASSWORD = os.getenv("MicrosoftAppPassword", "")
-OAUTH_ENDPOINT = os.getenv("MicrosoftOAuthEndpoint")
 
 workspace_client = WorkspaceClient(
     host=DATABRICKS_HOST,
@@ -263,7 +262,7 @@ def process_query_results(answer_json: Dict) -> str:
     
     return response
 
-SETTINGS = BotFrameworkAdapterSettings(APP_ID, APP_PASSWORD, oauth_endpoint=OAUTH_ENDPOINT)
+SETTINGS = BotFrameworkAdapterSettings(APP_ID, APP_PASSWORD)
 SETTINGS.microsoft_app_type = APP_TYPE
 SETTINGS.microsoft_app_tenant_id = TENANT_ID
 
@@ -320,7 +319,7 @@ async def messages(req: web.Request) -> web.Response:
             return web.json_response(data=response.body, status=response.status)
         return web.Response(status=201)
     except Exception as e:
-        logger.error(f"Error processing the request: {str(e)}")
+        logger.error(f"Error processing request: {str(e)} - {str(body)}")
         return web.Response(status=500)
 
 app = web.Application()
