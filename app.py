@@ -275,7 +275,10 @@ class MyBot(ActivityHandler):
     async def on_message_activity(self, turn_context: TurnContext):
         question = turn_context.activity.text
         user_id = turn_context.activity.from_property.id
+
+        logger.info(f'question: {question}')
         conversation_id = self.conversation_ids.get(user_id)
+        logger.info(f'conversation_id: {conversation_id}')
 
         try:
             answer, new_conversation_id = await ask_genie(question, DATABRICKS_SPACE_ID, conversation_id)
