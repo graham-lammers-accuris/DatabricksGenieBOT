@@ -27,7 +27,7 @@ import requests
 
 
 # Log
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Env vars
@@ -40,6 +40,7 @@ APP_ID = os.getenv("MicrosoftAppId")
 APP_TYPE = os.getenv("MicrosoftAppType")
 TENANT_ID = os.getenv("MicrosoftAppTenantId")  # Optional
 APP_PASSWORD = os.getenv("MicrosoftAppPassword", "")
+OAUTH_ENDPOINT = os.getenv("MicrosoftOAuthEndpoint")
 
 workspace_client = WorkspaceClient(
     host=DATABRICKS_HOST,
@@ -262,7 +263,7 @@ def process_query_results(answer_json: Dict) -> str:
     
     return response
 
-SETTINGS = BotFrameworkAdapterSettings(APP_ID, APP_PASSWORD)
+SETTINGS = BotFrameworkAdapterSettings(APP_ID, APP_PASSWORD, oauth_endpoint=OAUTH_ENDPOINT)
 SETTINGS.microsoft_app_type = APP_TYPE
 SETTINGS.microsoft_app_tenant_id = TENANT_ID
 
