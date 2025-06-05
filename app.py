@@ -36,6 +36,7 @@ load_dotenv()
 DATABRICKS_SPACE_ID = os.getenv("DATABRICKS_SPACE_ID")
 DATABRICKS_HOST = os.getenv("DATABRICKS_HOST")
 DATABRICKS_TOKEN = os.getenv("DATABRICKS_TOKEN")
+
 APP_ID = os.getenv("MicrosoftAppId")
 APP_TYPE = os.getenv("MicrosoftAppType")
 TENANT_ID = os.getenv("MicrosoftAppTenantId")  # Optional
@@ -59,11 +60,11 @@ def get_attachment_query_result(space_id, conversation_id, message_id, attachmen
     if response.status_code != 200:
         logger.error(f"Message endpoint returned status {response.status_code}: {response.text}")
         return {}
-    
+
     try:
         message_data = response.json()
         logger.info(f"Message data: {message_data}")
-        
+
         statement_id = None
         if "attachments" in message_data:
             for attachment in message_data["attachments"]:
@@ -71,30 +72,30 @@ def get_attachment_query_result(space_id, conversation_id, message_id, attachmen
                     if "query" in attachment and "statement_id" in attachment["query"]:
                         statement_id = attachment["query"]["statement_id"]
                         break
-        
+
         if not statement_id:
             logger.error("No statement_id found in message data")
             return {}
-            
+
         query_url = f"{DATABRICKS_HOST}/api/2.0/genie/spaces/{space_id}/conversations/{conversation_id}/messages/{message_id}/attachments/{attachment_id}/query-result"
         query_headers = {
             "Authorization": f"Bearer {DATABRICKS_TOKEN}",
             "Content-Type": "application/json",
             "X-Databricks-Statement-Id": statement_id
         }
-        
+
         query_response = requests.get(query_url, headers=query_headers)
         if query_response.status_code != 200:
             logger.error(f"Query result endpoint returned status {query_response.status_code}: {query_response.text}")
             return {}
-            
+
         if not query_response.text.strip():
             logger.error(f"Empty response from Genie API: {query_response.status_code}")
             return {}
-            
+
         result = query_response.json()
         logger.info(f"Raw query result response: {result}")
-        
+
         if isinstance(result, dict):
             if "data_array" in result:
                 if not isinstance(result["data_array"], list):
@@ -102,11 +103,11 @@ def get_attachment_query_result(space_id, conversation_id, message_id, attachmen
             if "schema" in result:
                 if not isinstance(result["schema"], dict):
                     result["schema"] = {}
-                    
+
             if "schema" in result and "columns" in result["schema"]:
                 if not isinstance(result["schema"]["columns"], list):
                     result["schema"]["columns"] = []
-                    
+
             if "data_array" in result and result["data_array"] and "schema" not in result:
                 first_row = result["data_array"][0]
                 if isinstance(first_row, dict):
@@ -117,7 +118,7 @@ def get_attachment_query_result(space_id, conversation_id, message_id, attachmen
                     result["schema"] = {
                         "columns": [{"name": f"Column {i}"} for i in range(len(first_row))]
                     }
-                    
+
         return result
     except Exception as e:
         logger.error(f"Failed to process Genie API response: {e}, text: {response.text}")
@@ -171,14 +172,14 @@ async def ask_genie(question: str, space_id: str, conversation_id: Optional[str]
                         attachment_id
                     )
                     logger.info(f"Raw query result: {query_result}")
-                    
+
                     query_description = getattr(query_obj, "description", "")
                     query_result_metadata = getattr(query_obj, "query_result_metadata", {})
                     statement_id = getattr(query_obj, "statement_id", "")
-                    
+
                     if hasattr(query_result_metadata, "__dict__"):
                         query_result_metadata = query_result_metadata.__dict__
-                    
+
                     logger.info(f"Query result metadata: {query_result_metadata}")
                     logger.info(f"Statement ID: {statement_id}")
 
@@ -207,9 +208,9 @@ async def ask_genie(question: str, space_id: str, conversation_id: Optional[str]
 
 def process_query_results(answer_json: Dict) -> str:
     response = ""
-    
+
     logger.info(f"Processing answer JSON: {answer_json}")
-    
+
     if "query_description" in answer_json and answer_json["query_description"]:
         response += f"## Query Description\n\n{answer_json['query_description']}\n\n"
 
@@ -224,21 +225,21 @@ def process_query_results(answer_json: Dict) -> str:
     if "statement_response" in answer_json:
         statement_response = answer_json["statement_response"]
         logger.info(f"Found statement_response: {statement_response}")
-        
+
         if "result" in statement_response and "data_array" in statement_response["result"]:
             response += "## Query Results\n\n"
-            
+
             schema = statement_response.get("manifest", {}).get("schema", {})
             columns = schema.get("columns", [])
             logger.info(f"Schema columns: {columns}")
-            
+
             header = "| " + " | ".join(col["name"] for col in columns) + " |"
             separator = "|" + "|".join(["---" for _ in columns]) + "|"
             response += header + "\n" + separator + "\n"
-            
+
             data_array = statement_response["result"]["data_array"]
             logger.info(f"Data array: {data_array}")
-            
+
             for row in data_array:
                 formatted_row = []
                 for value, col in zip(row, columns):
@@ -259,7 +260,7 @@ def process_query_results(answer_json: Dict) -> str:
     else:
         response += "No data available.\n\n"
         logger.error("No statement_response or message found in answer_json")
-    
+
     return response
 
 SETTINGS = BotFrameworkAdapterSettings(APP_ID, APP_PASSWORD)
@@ -273,6 +274,7 @@ class MyBot(ActivityHandler):
         self.conversation_ids: Dict[str, str] = {}
 
     async def on_message_activity(self, turn_context: TurnContext):
+
         question = turn_context.activity.text
         user_id = turn_context.activity.from_property.id
 
@@ -310,7 +312,9 @@ async def messages(req: web.Request) -> web.Response:
     else:
         return web.Response(status=415)
 
+
     activity = Activity().deserialize(body)
+
     auth_header = req.headers.get("Authorization", "")
 
     try:
