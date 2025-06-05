@@ -12,6 +12,7 @@ Note: This is experimental code and is not intended for production use.
 
 Update on May 02 to reflect Databricks API Changes https://www.databricks.com/blog/genie-conversation-apis-public-preview
 """
+
 import os
 import json
 import logging
