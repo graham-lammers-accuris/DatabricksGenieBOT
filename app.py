@@ -151,13 +151,15 @@ async def ask_genie(question: str, space_id: str, conversation_id: Optional[str]
         if conversation_id is None:
             initial_message = await loop.run_in_executor(None, genie_api.start_conversation_and_wait, space_id, question)
             conversation_id = initial_message.conversation_id
+            logger.error(f"Started new conversation with ID: {conversation_id}")
         else:
             initial_message = await loop.run_in_executor(None, genie_api.create_message_and_wait, space_id, conversation_id, question)
+            logger.error(f"Created message in conversation {conversation_id}")
 
         message_content = await loop.run_in_executor(None, genie_api.get_message,
             space_id, initial_message.conversation_id, initial_message.message_id)
 
-        logger.info(f"Raw message content: {message_content}")
+        logger.error(f"Raw message content: {message_content}")
 
         if message_content.attachments:
             for attachment in message_content.attachments:
